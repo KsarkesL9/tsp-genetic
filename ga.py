@@ -23,9 +23,14 @@ def count_distance(answer, table):
 
 def start(table, seed_num):
     n = len(table)
+    best_solutions_history = []
 
     def check_fitness(model, answer, index):
         return -count_distance(answer, table)
+
+    def on_generation(model):
+        best = model.best_solution()[0]
+        best_solutions_history.append(list(best))
 
     ga_obj = pygad.GA(
         num_generations=NUM_GENERATIONS,
@@ -43,6 +48,7 @@ def start(table, seed_num):
         mutation_percent_genes=MUTATION_PERCENT_GENES,
         random_seed=seed_num,
         suppress_warnings=True,
+        on_generation=on_generation,
     )
     ga_obj.run()
-    return ga_obj
+    return ga_obj, best_solutions_history

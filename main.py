@@ -1,14 +1,15 @@
 import sys
+import numpy as np
 import instance
 from config import SEED
 from ga import start, count_distance
-from plots import draw_chart
+from plots import draw_chart, draw_path_animation
 
 def main():
     seed_num = SEED
     file_to_load = ""
     is_loading = False
-    
+
     try:
         if len(sys.argv) > 1:
             seed_num = int(sys.argv[1])
@@ -19,21 +20,24 @@ def main():
         print("Cos poszlo nie tak")
         pass
 
+    rng = np.random.default_rng(seed_num)
+
     if is_loading == True:
         instance.read_file(file_to_load)
     else:
-        instance.make_table(seed_num)
-        
+        instance.make_table(rng)
+
     table = instance.table
 
     print("Liczba miast: {}".format(len(table)))
     print("Ziarno: {}".format(seed_num))
 
-    my_ga = start(table, seed_num)
+    ga_seed = int(rng.integers(0, 2**31))
+    my_ga, best_solutions_history = start(table, ga_seed)
 
     result = my_ga.best_solution()
     best_answer = result[0]
-    
+
     length = count_distance(best_answer, table)
 
     answer_numbers = []
@@ -46,6 +50,9 @@ def main():
     print("Dlugosc trasy: {}".format(int(length)))
 
     draw_chart(my_ga)
+
+    if not is_loading:
+        draw_path_animation(instance.coords, best_solutions_history)
 
 if __name__ == "__main__":
     main()
